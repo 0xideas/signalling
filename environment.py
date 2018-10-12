@@ -73,11 +73,14 @@ class Environment(object):
 
 			neighbour_actions = []
 			for neighbour in neighbours:
-				neighbour.update_external(3, action, state)
-				neighbour_actions.append(neighbour.action_choice[state][int(action[1:])]/len(neighbour_ids))
+				positive = neighbour.action_choice[state][int(action[1:])]
+				neighbour_actions.append(positive/len(neighbour_ids))
 
+				for other_state in neighbour.action_choice.keys():
+					if other_state != state:
+						neighbour.update_external(0, action, other_state)
 
-			update_value = (sum(neighbour_actions) + 2/3)**20
+			update_value = (sum(neighbour_actions) + 2/3)**10
 			print(neighbour_ids)
 			print(update_value)
 
