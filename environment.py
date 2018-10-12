@@ -73,9 +73,11 @@ class Environment(object):
 
 			neighbour_actions = []
 			for neighbour in neighbours:
-				neighbour_actions.append(neighbour.response_choice[action][int(state[1:])])
+				neighbour.update_external(3, action, state)
+				neighbour_actions.append(neighbour.action_choice[state][int(action[1:])]/len(neighbour_ids))
 
-			update_value = sum(neighbour_actions) + 1
+
+			update_value = (sum(neighbour_actions) + 2/3)**20
 			print(neighbour_ids)
 			print(update_value)
 
@@ -103,7 +105,7 @@ if __name__ == '__main__':
 	env = Environment((5,5), 5, 3, 3)
 	env.print_board()
 
-	for x in range(200):
+	for x in range(5000):
 		print('_______________ step {} ________________'.format(x))
 		env.move_all()
 		env.act_all()
