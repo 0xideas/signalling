@@ -10,6 +10,7 @@ class Agent(object):
 		self.actions = ["a" + str(x) for x in range(action_number)]
 		self.action_rewards = {"s" + str(y):[1 for x in range(action_number)] for y in range(state_number)}
 		self.action_choice = self.new_action_prob()
+		self.response_choice = self.new_response_prob()
 		self.last_movement = "None"
 		self.movements = ["up", "down", "left", "right", "stay"]
 		self.movement_choice = [0.2, 0.2, 0.2, 0.2, 0.2]
@@ -32,6 +33,7 @@ class Agent(object):
 		self.action_rewards[self.last_state] = rewards
 		self.action_choice = self.new_action_prob()
 		self.movement_choice = self.new_movement_prob(reward)
+		self.response_choice = self.new_response_prob()
 
 	def new_movement_prob(self, reward):
 		last_move_i = self.movements.index(self.last_movement)
@@ -52,6 +54,14 @@ class Agent(object):
 			action_probs[state_i] = [self.action_rewards[state_i][x]/total_reward for x in range(self.action_number)]
 		return(action_probs)
 
+	def new_response_prob(self):
+		response_prob = {}
+		for x in range(self.action_number):
+			probs = [self.action_choice[y][x] for y in sorted(list(self.action_choice.keys()))]
+			prob_sum = sum(probs)
+			probs = [p/prob_sum for p in probs]
+			response_prob[self.actions[x]] = probs
+		return(response_prob)
 
 if __name__ == "__main__":
 	ag = Agent(2,3)
@@ -85,3 +95,5 @@ if __name__ == "__main__":
 		print(ag.action_rewards)
 		print("action _choice: ")
 		print(ag.action_choice)
+		print("response_choice: ")
+		print(ag.response_choice)

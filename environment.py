@@ -58,7 +58,7 @@ class Environment(object):
 			original_state = choice(self.original_states)
 			agent_i = int(agent_id[1:])
 			agent = self.agents[agent_id]
-			state = self.determine_state(agent_id, original_state)
+			state = choice(self.states)
 			action = agent.act(state)
 
 			self.agent_actions[agent_i] = action
@@ -68,14 +68,18 @@ class Environment(object):
 			agent = self.agents[agent_id]
 			state = agent.last_state
 			action = agent.last_action
-			if (state == "s0" and action == "a0"):
-				agent.update(2)
-			elif (state == "s1" and action == "a1"):
-				agent.update(3)
-			elif (state == "s2" and action == "a2"):
-				agent.update(3)
-			else:
-				agent.update(0)
+			neighbour_ids = self.get_neighbours(agent_id)
+			neighbours = [self.agents[neighbour_id] for neighbour_id in neighbour_ids]
+
+			neighbour_actions = []
+			for neighbour in neighbours:
+				neighbour_actions.append(neighbour.response_choice[action][int(state[1:])])
+
+			update_value = sum(neighbour_actions) + 1
+			print(neighbour_ids)
+			print(update_value)
+
+			agent.update(update_value)
 
 	def get_neighbours(self, agent_id):
 		agent_i = int(agent_id[1:])
@@ -87,21 +91,8 @@ class Environment(object):
 			if location != agent_location and (cond1 or cond2):
 				neighbour = self.agent_locations.index(location)
 				neighbours.append("A" + str(neighbour))
+		#self.agents[agent_id].neighbours = neighbours
 		return(neighbours)
-
-	def determine_state(self, agent_id, original_state):
-		neighbours = self.get_neighbours(agent_id)
-		state = "None"
-		if len(neighbours) == 0:
-			state = "s0"
-		else:
-			if original_state == "os0":
-				state = "s1"
-			if original_state == "os1":
-				state = "s2"
-
-		return(state)
-
 
 
 
@@ -112,15 +103,15 @@ if __name__ == '__main__':
 	env = Environment((5,5), 5, 3, 3)
 	env.print_board()
 
-	for x in range(200):
+	for x in range(20000):
 		print('_______________ step {} ________________'.format(x))
 		env.move_all()
 		env.act_all()
 		env.update_all()
 		env.print_board()
 
-	for agent_id in env.agents:
-		print(agent_id, "______________________________________________________")
+	for agent_id in sorted(list(env.agents.keys())):
+		print("A" + str(int(agent_id[1:]) + 1), "______________________________________________________")
 		agent = env.agents[agent_id]
 		for key in sorted(list(agent.action_choice.keys())):
 			print("situation", key, "---")
