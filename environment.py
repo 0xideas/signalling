@@ -48,7 +48,7 @@ class Environment(object):
 		x = 0
 		for location in self.agent_locations:
 			#one cannot see the first agent
-			board[location] = x
+			board[location] = x + 1
 			x += 1
 		print(board)
 
