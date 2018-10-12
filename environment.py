@@ -17,6 +17,8 @@ class Environment(object):
 		self.agent_locations = [self.fields[x] for x in agent_location_id]
 		self.agent_actions = ["None" for x in self.agents]
 
+		self.original_states = ["os0", "os1"]
+
 	def move_all(self):
 		for agent_id in self.agents:
 			agent = self.agents[agent_id]
@@ -53,9 +55,10 @@ class Environment(object):
 	def act_all(self):
 		self.agent_actions = [str("None") for x in self.agent_actions]
 		for agent_id in self.agents:
+			original_state = choice(self.original_states)
 			agent_i = int(agent_id[1:])
 			agent = self.agents[agent_id]
-			state = self.determine_state(agent_id)
+			state = self.determine_state(agent_id, original_state)
 			action = agent.act(state)
 
 			self.agent_actions[agent_i] = action
@@ -66,27 +69,47 @@ class Environment(object):
 			state = agent.last_state
 			action = agent.last_action
 			if (state == "s0" and action == "a0"):
-				agent.update(1)
-			elif (state == "s1" and action == "a1"):
 				agent.update(2)
+			elif (state == "s1" and action == "a1"):
+				agent.update(3)
+			elif (state == "s2" and action == "a2"):
+				agent.update(3)
 			else:
 				agent.update(0)
 
-	def determine_state(self, agent_id):
-		#this version determines whether the agent has a neighbour
+	def get_neighbours(self, agent_id):
 		agent_i = int(agent_id[1:])
-		state = "s0"
+		neighbours = []
 		agent_location = self.agent_locations[agent_i]
 		for location in self.agent_locations:
 			cond1 = (abs(location[0] - agent_location[0]) == 1) and (location[1] == agent_location[1])
 			cond2 = (abs(location[1] - agent_location[1]) == 1) and (location[0] == agent_location[0])
 			if location != agent_location and (cond1 or cond2):
+				neighbour = self.agent_locations.index(location)
+				neighbours.append("A" + str(neighbour))
+		return(neighbours)
+
+	def determine_state(self, agent_id, original_state):
+		neighbours = self.get_neighbours(agent_id)
+		state = "None"
+		if len(neighbours) == 0:
+			state = "s0"
+		else:
+			if original_state == "os0":
 				state = "s1"
+			if original_state == "os1":
+				state = "s2"
+
 		return(state)
 
 
+
+
+
+
+
 if __name__ == '__main__':
-	env = Environment((5,5), 5, 2, 2)
+	env = Environment((5,5), 5, 3, 3)
 	env.print_board()
 
 	for x in range(200):
@@ -96,4 +119,9 @@ if __name__ == '__main__':
 		env.update_all()
 		env.print_board()
 
-
+	for agent_id in env.agents:
+		print(agent_id, "______________________________________________________")
+		agent = env.agents[agent_id]
+		for key in sorted(list(agent.action_choice.keys())):
+			print("situation", key, "---")
+			print(agent.action_choice[key])
