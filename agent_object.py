@@ -1,6 +1,9 @@
 from numpy.random import choice
 
 class Agent(object):
+	"""
+	Encapsulates an agent
+	"""
 	def __init__(self, action_number=2, state_number=2, alpha=0.4):
 		self.action_number = action_number
 		self.state_number = state_number
@@ -15,17 +18,26 @@ class Agent(object):
 		self.movement_choice = [0.2, 0.2, 0.2, 0.2, 0.2]
 
 	def move(self):
+		"""
+		select a direction to move in
+		"""
 		self.last_movement = choice(self.movements, p=self.movement_choice)
 		return(self.last_movement)
 
 
 	def act(self, state):
+		"""
+		select an action to perform
+		"""
 		self.last_state = state
 		action_probs = self.action_choice[state]
 		self.last_action = choice(self.actions, p=action_probs)
 		return(self.last_action)
 
 	def update(self, reward):
+		"""
+		update the reward value associated with every state/action pair. Update action probabilities and movement probabilities accordingly
+		"""
 		rewards = self.action_rewards[self.last_state]
 		action = int(self.last_action[1:])
 		rewards[action] = reward * self.alpha + rewards[action] * (1 - self.alpha)
@@ -34,12 +46,18 @@ class Agent(object):
 		self.movement_choice = self.new_movement_prob(reward)
 
 	def update_external(self, reward, action, state):
+		"""
+		update reward values associated with state/action pairs from outside, i.e. when learning from someone else's actions and their consequences
+		"""
 		rewards = self.action_rewards[state]
 		rewards[int(action[1:])] = reward * self.alpha + rewards[int(action[1:])] * (1 - self.alpha)
 		self.action_rewards[state] = rewards
 		self.action_choice = self.new_action_prob()
 
 	def new_movement_prob(self, reward):
+		"""
+		create the new probability of moving in different predictions based on the reward gained on the previous move
+		"""
 		last_move_i = self.movements.index(self.last_movement)
 		last_prob = self.movement_choice[last_move_i]
 		new_prob = last_prob + self.alpha/2 * (reward - 1)
@@ -49,8 +67,11 @@ class Agent(object):
 		total_prob = sum(move_choice)
 		return([move_choice[x]/total_prob for x in range(5)])
 
-
 	def new_action_prob(self):
+		"""
+		update the action probabilities given a new reward. The probabilities for each action given a state are the share of the reward accrued by that action given that state,
+		relative to the total rewards accrued given the state
+		"""
 		action_probs = {}
 		for i in range(self.state_number):
 			state_i = "s" + str(i)
