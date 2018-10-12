@@ -103,7 +103,7 @@ if __name__ == '__main__':
 	env = Environment((5,5), 5, 3, 3)
 	env.print_board()
 
-	for x in range(20000):
+	for x in range(200):
 		print('_______________ step {} ________________'.format(x))
 		env.move_all()
 		env.act_all()
